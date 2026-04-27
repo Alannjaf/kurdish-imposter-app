@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Kurdish Imposter — Design Canvas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  html, body, #root { margin: 0; padding: 0; width: 100%; height: 100%; }
+  body { background: #f0eee9; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="i18n.jsx"></script>
+<script type="text/babel" src="screens-1.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+<script type="text/babel" src="screens-3.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "language": "ku",
+  "theme": "light",
+  "accent": "pomegranate",
+  "playerCount": 6
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  pomegranate: { primary: 'oklch(0.55 0.18 25)', dark: 'oklch(0.45 0.16 25)' },
+  indigo:      { primary: 'oklch(0.45 0.14 270)', dark: 'oklch(0.35 0.12 270)' },
+  olive:       { primary: 'oklch(0.55 0.10 130)', dark: 'oklch(0.45 0.09 130)' },
+  amber:       { primary: 'oklch(0.65 0.15 60)',  dark: 'oklch(0.55 0.14 60)' },
+};
+
+// Frame wrapper — handles direction, theme, accent overrides
+function Frame({ tweaks, children }) {
+  const lang = tweaks.language;
+  const dir = STRINGS[lang].dir;
+  const accent = ACCENTS[tweaks.accent] || ACCENTS.pomegranate;
+  const isDark = tweaks.theme === 'dark';
+
+  return (
+    <IOSDevice width={360} height={780} dark={isDark}>
+      <div className={`app ${isDark ? 'theme-dark' : ''}`} dir={dir} style={{
+        '--pomegranate': accent.primary,
+        '--pomegranate-2': accent.dark,
+      }}>
+        {children}
+      </div>
+    </IOSDevice>
+  );
+}
+
+function ScreenCard({ tweaks, children }) {
+  return (
+    <div style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#fafaf7' }}>
+      <Frame tweaks={tweaks}>
+        {children}
+      </Frame>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const lang = tweaks.language;
+  const s = STRINGS[lang];
+
+  const W = 392, H = 812; // artboard size
+
+  return (
+    <>
+      <DesignCanvas>
+        <DCSection id="flow" title="Kurdish Imposter — Full Flow"
+          subtitle="Pass-the-phone party game · Kurdish Sorani (RTL) by default · KU / AR / EN">
+          <DCArtboard id="home" label="01 · Home" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><HomeScreen s={s} lang={lang} theme={tweaks.theme} onLang={(l) => setTweak('language', l)} onTheme={(t) => setTweak('theme', t)} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="setup" label="02 · Setup" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><SetupScreen s={s} lang={lang} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="pass" label="03 · Deal — Pass" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><DealPassScreen s={s} lang={lang} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="reveal-word" label="04a · Reveal — Your Word" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><DealRevealScreen s={s} lang={lang} revealed={true} isImposter={false} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="reveal-imposter" label="04b · Reveal — Imposter" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><DealRevealScreen s={s} lang={lang} revealed={true} isImposter={true} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="discuss" label="05 · Discuss" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><DiscussScreen s={s} lang={lang} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="vote" label="06 · Vote" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><VoteScreen s={s} lang={lang} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="reveal-win" label="07a · Reveal — Group Wins" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><RevealScreen s={s} lang={lang} groupWon={true} /></ScreenCard>
+          </DCArtboard>
+
+          <DCArtboard id="reveal-lose" label="07b · Reveal — Imposter Wins" width={W} height={H}>
+            <ScreenCard tweaks={tweaks}><RevealScreen s={s} lang={lang} groupWon={false} /></ScreenCard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCPostIt top={20} left={60} rotate={-3} width={220}>
+          Default lang is Kurdish Sorani (RTL). Use Tweaks to switch language, theme, or accent — everything updates live.
+        </DCPostIt>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Language">
+          <TweakRadio
+            value={tweaks.language}
+            onChange={(v) => setTweak('language', v)}
+            options={[
+              { value: 'ku', label: 'کوردی' },
+              { value: 'ar', label: 'العربية' },
+              { value: 'en', label: 'English' },
+            ]} />
+        </TweakSection>
+
+        <TweakSection title="Theme">
+          <TweakRadio
+            value={tweaks.theme}
+            onChange={(v) => setTweak('theme', v)}
+            options={[
+              { value: 'light', label: 'Light' },
+              { value: 'dark', label: 'Dark' },
+            ]} />
+        </TweakSection>
+
+        <TweakSection title="Accent color">
+          <TweakRadio
+            value={tweaks.accent}
+            onChange={(v) => setTweak('accent', v)}
+            options={[
+              { value: 'pomegranate', label: 'Pomegranate' },
+              { value: 'indigo', label: 'Indigo' },
+              { value: 'olive', label: 'Olive' },
+              { value: 'amber', label: 'Amber' },
+            ]} />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
