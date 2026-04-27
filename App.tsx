@@ -51,6 +51,7 @@ import {
 } from './i18n';
 import { MuteProvider, play, useMuted } from './sound';
 import { feedback, haptic } from './haptics';
+import { OnlineModeRouter } from './multiplayer/OnlineModeRouter';
 
 type ScreenName =
   | 'home'
@@ -60,7 +61,8 @@ type ScreenName =
   | 'discuss'
   | 'vote_pass'
   | 'vote'
-  | 'reveal';
+  | 'reveal'
+  | 'online';
 
 // Convert ASCII numerals to Arabic-Indic for ku/ar locales.
 const AR_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -152,9 +154,11 @@ function AppInner() {
         <HomeScreen
           onPlay={() => setScreen('setup')}
           onHowToPlay={() => setScreen('how_to_play')}
+          onOnline={() => setScreen('online')}
         />
       )}
       {screen === 'how_to_play' && <HowToPlayScreen onBack={() => setScreen('home')} />}
+      {screen === 'online' && <OnlineModeRouter onExit={() => setScreen('home')} />}
       {screen === 'setup' && (
         <SetupScreen
           config={config}
@@ -221,7 +225,15 @@ function useCategoryLabel(): (game: GameState) => string {
 }
 
 // ─── HOME ─────────────────────────────────────────────────────────
-function HomeScreen({ onPlay, onHowToPlay }: { onPlay: () => void; onHowToPlay: () => void }) {
+function HomeScreen({
+  onPlay,
+  onHowToPlay,
+  onOnline,
+}: {
+  onPlay: () => void;
+  onHowToPlay: () => void;
+  onOnline: () => void;
+}) {
   const t = useT();
   const colors = useThemeColors();
   const { theme, toggleTheme } = useTheme();
@@ -383,6 +395,14 @@ function HomeScreen({ onPlay, onHowToPlay }: { onPlay: () => void; onHowToPlay: 
           onPress={() => {
             feedback('tap');
             onPlay();
+          }}
+        />
+        <Button
+          title={t('home.btn.online')}
+          kind="ghost"
+          onPress={() => {
+            feedback('tap');
+            onOnline();
           }}
         />
         <Button
