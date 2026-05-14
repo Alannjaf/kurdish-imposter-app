@@ -26,6 +26,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { fonts, useThemeColors } from '../../theme';
@@ -44,9 +45,13 @@ export function ChatPanel({ chat, send, mySeat }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
+  const { height: viewportHeight } = useWindowDimensions();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const scrollRef = useRef<ScrollView | null>(null);
+  // Percent heights don't resolve cleanly inside KeyboardAvoidingView on web —
+  // compute an explicit pixel height so the panel reliably gets ~70% of viewport.
+  const panelHeight = Math.floor(viewportHeight * 0.7);
 
   // Keep view pinned to the latest message.
   useEffect(() => {
@@ -155,10 +160,10 @@ export function ChatPanel({ chat, send, mySeat }: Props) {
             borderTopRightRadius: 22,
             borderTopWidth: 1,
             borderColor: colors.line,
-            // Fixed height so the messages list always has room to scroll,
-            // even when only one or two messages exist. The active phase
-            // stays visible above the panel.
-            height: '70%',
+            // Explicit pixel height (~70% of viewport) so the message list
+            // always has room to scroll, even with one or two messages, and
+            // so percent-height issues inside KAV don't collapse the panel.
+            height: panelHeight,
             shadowColor: '#000',
             shadowOpacity: 0.18,
             shadowOffset: { width: 0, height: -3 },
