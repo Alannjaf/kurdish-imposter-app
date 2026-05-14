@@ -184,6 +184,7 @@
   "multiplayer.reveal.steal.correct": "تمت السرقة! فاز الدخيل.",
   "multiplayer.reveal.steal.wrong": "تخمين خاطئ. فاز الفريق.",
   "multiplayer.reveal.btn.next_round": "الجولة التالية",
+  "multiplayer.reveal.btn.save_image": "احفظ الصورة",
   "multiplayer.reveal.waiting_for_host": "بانتظار المضيف…",
   "multiplayer.chat.title": "الدردشة",
   "multiplayer.chat.placeholder": "اكتب رسالة…",

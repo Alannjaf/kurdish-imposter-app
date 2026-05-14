@@ -184,6 +184,7 @@
   "multiplayer.reveal.steal.correct": "Stolen! Imposter wins.",
   "multiplayer.reveal.steal.wrong": "Wrong guess. Crew wins.",
   "multiplayer.reveal.btn.next_round": "Next Round",
+  "multiplayer.reveal.btn.save_image": "Save Image",
   "multiplayer.reveal.waiting_for_host": "Waiting for the host…",
   "multiplayer.chat.title": "Chat",
   "multiplayer.chat.placeholder": "Type a message…",

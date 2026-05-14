@@ -30,12 +30,13 @@
 //   multiplayer.reveal.waiting_for_host
 
 import React, { useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Button, DiamondBg, Octagram, Pill } from '../../ui';
 import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { exportResultCardAsPng } from '../resultCard';
 import type { ChatMessage } from '../__stub_usePartyRoom';
 
 type Props = {
@@ -118,6 +119,15 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 24, paddingBottom: 90 }}
         showsVerticalScrollIndicator={false}
       >
+        <View
+          nativeID="reveal-card-capture"
+          style={{
+            backgroundColor: bg,
+            paddingVertical: 6,
+            paddingHorizontal: 4,
+            borderRadius: 16,
+          }}
+        >
         <View style={{ marginBottom: 24 }}>
           <Text
             style={{
@@ -456,9 +466,38 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
             </Text>
           </View>
         ) : null}
+        </View>
       </ScrollView>
 
       <View style={{ paddingHorizontal: 24, paddingBottom: 90, gap: 10 }}>
+        {Platform.OS === 'web' ? (
+          <TouchableOpacity
+            onPress={() =>
+              exportResultCardAsPng(
+                'reveal-card-capture',
+                `imposter-round-${state.roundId}.png`
+              )
+            }
+            accessibilityLabel="save-result-image"
+            style={{
+              paddingVertical: 10,
+              borderRadius: 14,
+              backgroundColor: groupWon ? colors.bgElev : 'rgba(255,255,255,0.12)',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                color: ink,
+                fontFamily: family,
+                fontSize: 14,
+                fontWeight: '700',
+              }}
+            >
+              📸 {t('multiplayer.reveal.btn.save_image')}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
         {isHost ? (
           <Button
             title={t('multiplayer.reveal.btn.next_round')}
