@@ -30,6 +30,9 @@
     },
     "plugins": [
       "expo-localization"
-    ]
+    ],
+    "experiments": {
+      "baseUrl": "/kurdish-imposter"
+    }
   }
 }
