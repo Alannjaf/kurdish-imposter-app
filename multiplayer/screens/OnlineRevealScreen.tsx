@@ -146,7 +146,9 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
           >
             {groupWon
               ? t('multiplayer.reveal.crew_wins', { name: accused?.name ?? '' })
-              : t('multiplayer.reveal.imposter_wins', { name: accused?.name ?? '' })}
+              : t('multiplayer.reveal.imposter_wins', {
+                  name: imposterPlayers.map((p) => p.name).join(', ') || accused?.name || '',
+                })}
           </Text>
         </View>
 
