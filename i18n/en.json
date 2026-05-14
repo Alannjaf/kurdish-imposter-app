@@ -124,6 +124,7 @@
   "multiplayer.lobby.options.custom_help": "One pair per line: crew_word|imposter_word",
   "multiplayer.lobby.options.custom_placeholder": "apple|banana\nsea|river\n…",
   "multiplayer.lobby.options.custom_pairs_count": "{n} pair(s) — need ≥5",
+  "multiplayer.home.avatar_label": "Pick your avatar",
   "multiplayer.lobby.copied": "Copied!",
   "multiplayer.lobby.players_heading": "Players",
   "multiplayer.lobby.player_host": "Host",

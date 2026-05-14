@@ -44,7 +44,11 @@ export type OnlineHomeJoinPayload = {
   code?: string;
   name: string;
   asHost: boolean;
+  /** Optional emoji avatar chosen via the 6-emoji picker. */
+  avatar?: string;
 };
+
+export const AVATAR_CHOICES = ['🦊', '🐯', '🐼', '🦁', '🐺', '🦅'] as const;
 
 type Props = {
   onJoin: (payload: OnlineHomeJoinPayload) => void;
@@ -75,6 +79,7 @@ export function OnlineHomeScreen({ onJoin, onBack, defaultName }: Props) {
   const [mode, setMode] = useState<Mode>('menu');
   const [name, setName] = useState(defaultName ?? '');
   const [code, setCode] = useState('');
+  const [avatar, setAvatar] = useState<string>(AVATAR_CHOICES[0]);
 
   const family = locale === 'en' ? fonts.ui : fonts.arabicUI;
 
@@ -87,11 +92,11 @@ export function OnlineHomeScreen({ onJoin, onBack, defaultName }: Props) {
     const finalName =
       name.trim().length > 0 ? sanitizeName(name) : fallbackName;
     if (asHost) {
-      onJoin({ name: finalName, asHost: true });
+      onJoin({ name: finalName, asHost: true, avatar });
     } else {
       const c = sanitizeCode(code);
       if (c.length !== ROOM_CODE_LENGTH) return;
-      onJoin({ code: c, name: finalName, asHost: false });
+      onJoin({ code: c, name: finalName, asHost: false, avatar });
     }
   };
 
@@ -179,6 +184,8 @@ export function OnlineHomeScreen({ onJoin, onBack, defaultName }: Props) {
             placeholder={fallbackName}
             t={t}
           />
+          <View style={{ height: 16 }} />
+          <AvatarPicker value={avatar} onChange={setAvatar} t={t} />
 
           <View style={{ flex: 1 }} />
           <Button
@@ -250,6 +257,8 @@ export function OnlineHomeScreen({ onJoin, onBack, defaultName }: Props) {
             placeholder={fallbackName}
             t={t}
           />
+          <View style={{ height: 16 }} />
+          <AvatarPicker value={avatar} onChange={setAvatar} t={t} />
 
           <View style={{ flex: 1 }} />
           <Button
@@ -308,6 +317,62 @@ function NameField({
           textAlign: isRTL ? 'right' : 'left',
         }}
       />
+    </View>
+  );
+}
+
+function AvatarPicker({
+  value,
+  onChange,
+  t,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  t: (k: string) => string;
+}) {
+  const colors = useThemeColors();
+  const { locale, isRTL } = useLocale();
+  const family = locale === 'en' ? fonts.ui : fonts.arabicUI;
+  return (
+    <View>
+      <Text
+        style={{
+          fontSize: 14,
+          color: colors.ink2,
+          marginBottom: 8,
+          fontFamily: family,
+          textAlign: isRTL ? 'right' : 'left',
+        }}
+      >
+        {t('multiplayer.home.avatar_label')}
+      </Text>
+      <View
+        accessibilityLabel="avatar-picker"
+        style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
+      >
+        {AVATAR_CHOICES.map((emoji) => {
+          const sel = value === emoji;
+          return (
+            <TouchableOpacity
+              key={emoji}
+              onPress={() => onChange(emoji)}
+              accessibilityLabel={`avatar-${emoji}`}
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                backgroundColor: sel ? colors.ink : colors.bgElev,
+                borderWidth: sel ? 2 : 0,
+                borderColor: colors.gold,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 28 }}>{emoji}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }

@@ -36,14 +36,14 @@ function randomRoomCode(): string {
   return out;
 }
 
-type Session = { code: string; name: string; asHost: boolean };
+type Session = { code: string; name: string; asHost: boolean; avatar?: string };
 
 export function OnlineModeRouter({ onExit }: { onExit: () => void }) {
   const [session, setSession] = useState<Session | null>(null);
 
   const handleJoin = (payload: OnlineHomeJoinPayload) => {
     const code = payload.code ?? randomRoomCode();
-    setSession({ code, name: payload.name, asHost: payload.asHost });
+    setSession({ code, name: payload.name, asHost: payload.asHost, avatar: payload.avatar });
   };
 
   if (!session) {
@@ -61,6 +61,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
     code: session.code,
     name: session.name,
     asHost: session.asHost,
+    avatar: session.avatar,
   });
 
   const myPlayerId = useMemo(() => {

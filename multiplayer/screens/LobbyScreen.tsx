@@ -245,21 +245,25 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
                       width: 32,
                       height: 32,
                       borderRadius: 16,
-                      backgroundColor: AVATAR[p.seat % AVATAR.length],
+                      backgroundColor: p.avatar ? colors.bgElev : AVATAR[p.seat % AVATAR.length],
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Text
-                      style={{
-                        color: '#FFF',
-                        fontFamily: fonts.display,
-                        fontWeight: '700',
-                        fontSize: 13,
-                      }}
-                    >
-                      {p.seat + 1}
-                    </Text>
+                    {p.avatar ? (
+                      <Text style={{ fontSize: 18 }}>{p.avatar}</Text>
+                    ) : (
+                      <Text
+                        style={{
+                          color: '#FFF',
+                          fontFamily: fonts.display,
+                          fontWeight: '700',
+                          fontSize: 13,
+                        }}
+                      >
+                        {p.seat + 1}
+                      </Text>
+                    )}
                   </View>
                   <Text
                     style={{

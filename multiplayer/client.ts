@@ -82,6 +82,7 @@ export class PartyClient extends EventEmitter<PartyClientEvents> {
   private roomCode: string | null = null;
   private name: string = '';
   private asHost: boolean = false;
+  private avatar: string | undefined = undefined;
 
   private playerId: string | null = null;
   private playerIdPromise: Promise<string> | null = null;
@@ -131,11 +132,17 @@ export class PartyClient extends EventEmitter<PartyClientEvents> {
     return this.playerIdPromise;
   }
 
-  async connect(roomCode: string, name: string, asHost: boolean = false): Promise<void> {
+  async connect(
+    roomCode: string,
+    name: string,
+    asHost: boolean = false,
+    avatar?: string
+  ): Promise<void> {
     this.explicitlyClosed = false;
     this.roomCode = roomCode;
     this.name = name;
     this.asHost = asHost;
+    this.avatar = avatar;
     await this.getOrCreatePlayerId();
     this.openSocket();
   }
@@ -175,6 +182,7 @@ export class PartyClient extends EventEmitter<PartyClientEvents> {
         playerId: this.playerId ?? '',
         name: this.name,
         ...(this.asHost ? { asHost: true } : {}),
+        ...(this.avatar ? { avatar: this.avatar } : {}),
       };
       this.rawSend(helloMsg);
       // Flush any queued outbound messages from the disconnected period.

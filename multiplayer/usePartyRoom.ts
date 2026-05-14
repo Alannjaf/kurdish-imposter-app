@@ -29,6 +29,8 @@ export type UsePartyRoomOptions = {
   code: string | null;
   name: string;
   asHost?: boolean;
+  /** Optional emoji avatar to send with hello. */
+  avatar?: string;
 };
 
 export type UsePartyRoomResult = {
@@ -43,7 +45,7 @@ export type UsePartyRoomResult = {
 const CHAT_BUFFER_LIMIT = 100;
 
 export function usePartyRoom(opts: UsePartyRoomOptions): UsePartyRoomResult {
-  const { host, code, name, asHost } = opts;
+  const { host, code, name, asHost, avatar } = opts;
 
   const clientRef = useRef<PartyClient | null>(null);
 
@@ -121,7 +123,7 @@ export function usePartyRoom(opts: UsePartyRoomOptions): UsePartyRoomResult {
       setStatus('disconnected');
     });
 
-    client.connect(code, name, !!asHost).catch((e: unknown) => {
+    client.connect(code, name, !!asHost, avatar).catch((e: unknown) => {
       setLastError(e instanceof Error ? e.message : String(e));
       setStatus('error');
     });
@@ -131,8 +133,8 @@ export function usePartyRoom(opts: UsePartyRoomOptions): UsePartyRoomResult {
       client.disconnect();
       if (clientRef.current === client) clientRef.current = null;
     };
-    // We intentionally re-run on code/host/name/asHost changes.
-  }, [host, code, name, asHost]);
+    // We intentionally re-run on code/host/name/asHost/avatar changes.
+  }, [host, code, name, asHost, avatar]);
 
   return { state, role, chat, send, status, lastError };
 }

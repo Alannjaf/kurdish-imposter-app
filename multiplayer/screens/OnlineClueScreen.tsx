@@ -247,7 +247,9 @@ export function OnlineClueScreen({ state, role, myPlayerId, send, chat = [], now
                   backgroundColor: p.connected ? colors.olive : colors.ink3,
                 }}
               />
-              <Text style={{ fontSize: 13, color: colors.ink, fontFamily: family }}>{p.name}</Text>
+              <Text style={{ fontSize: 13, color: colors.ink, fontFamily: family }}>
+                {p.avatar ? `${p.avatar} ` : ''}{p.name}
+              </Text>
             </View>
           ))}
         </ScrollView>

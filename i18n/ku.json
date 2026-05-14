@@ -124,6 +124,7 @@
   "multiplayer.lobby.options.custom_help": "هەر دێڕ یەک جووت: وشەی هاوڕێ|وشەی فێڵباز",
   "multiplayer.lobby.options.custom_placeholder": "سێو|مۆز\nدەریا|ڕووبار\n…",
   "multiplayer.lobby.options.custom_pairs_count": "{n} جووت — پێویستە ≥٥",
+  "multiplayer.home.avatar_label": "هەڵبژاردنی ئاواتارت",
   "multiplayer.lobby.copied": "کۆپی کرا!",
   "multiplayer.lobby.players_heading": "یاریزانەکان",
   "multiplayer.lobby.player_host": "خاوەن ژوور",

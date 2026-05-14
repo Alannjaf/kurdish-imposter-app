@@ -16,6 +16,7 @@ export type PublicPlayer = {
   playerId: string;
   name: string;
   connected: boolean;
+  avatar?: string;
 };
 
 export type RoundResult = {
@@ -47,7 +48,7 @@ export type PublicRoomState = {
 
 // Client → Server
 export type C2S =
-  | { type: 'hello'; playerId: string; name: string; asHost?: boolean }
+  | { type: 'hello'; playerId: string; name: string; asHost?: boolean; avatar?: string }
   | {
       type: 'set_options';
       categoryKey: string;

@@ -124,6 +124,7 @@
   "multiplayer.lobby.options.custom_help": "زوج لكل سطر: كلمة_الفريق|كلمة_الدخيل",
   "multiplayer.lobby.options.custom_placeholder": "تفاحة|موزة\nبحر|نهر\n…",
   "multiplayer.lobby.options.custom_pairs_count": "{n} زوج — يلزم ≥٥",
+  "multiplayer.home.avatar_label": "اختر صورتك الرمزية",
   "multiplayer.lobby.copied": "تم النسخ!",
   "multiplayer.lobby.players_heading": "اللاعبون",
   "multiplayer.lobby.player_host": "المضيف",

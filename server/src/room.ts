@@ -52,6 +52,7 @@ type InternalPlayer = {
   name: string;
   connected: boolean;
   lastChatMs: number;
+  avatar?: string;
 };
 
 type ActiveRound = {
@@ -220,6 +221,9 @@ export class RoomState {
       // Reconnect: re-attach to existing seat. Name is allowed to update.
       existing.connected = true;
       if (msg.name && msg.name.trim()) existing.name = msg.name.trim().slice(0, 32);
+      if (msg.avatar && typeof msg.avatar === 'string') {
+        existing.avatar = msg.avatar.slice(0, 8);
+      }
       // Host reclaim: the original host returned inside the grace window.
       if (
         this.hostReclaimDeadlineMs != null &&
@@ -245,12 +249,14 @@ export class RoomState {
     }
     const name = (msg.name?.trim() || `Player ${this.players.length + 1}`).slice(0, 32);
     const seat = this.players.length;
+    const avatar = typeof msg.avatar === 'string' ? msg.avatar.slice(0, 8) : undefined;
     const player: InternalPlayer = {
       seat,
       playerId,
       name,
       connected: true,
       lastChatMs: 0,
+      ...(avatar ? { avatar } : {}),
     };
     this.players.push(player);
     if (!this.hostPlayerId) this.hostPlayerId = playerId;
@@ -678,6 +684,7 @@ export class RoomState {
       playerId: p.playerId,
       name: p.name,
       connected: p.connected,
+      ...(p.avatar ? { avatar: p.avatar } : {}),
     }));
     const scores: Record<string, number> = {};
     for (const p of this.players) {
