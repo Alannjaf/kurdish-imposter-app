@@ -70,6 +70,11 @@ const DEFAULT_OPTIONS: RoomOptions = {
   stealGuess: false,
 };
 
+/** Grace window after a host's WS closes before the next player is promoted.
+ *  Lets refresh / brief network blips recover host status when the original
+ *  client reconnects with the same persisted playerId. */
+const HOST_RECLAIM_GRACE_MS = 8000;
+
 // ---------------------------------------------------------------------------
 // Helpers
 
@@ -98,6 +103,9 @@ export class RoomState {
   private round: ActiveRound | null = null;
   private clueEndsAt: number | null = null;
   private voteEndsAt: number | null = null;
+  /** When set, a host's WS just dropped — promotion deferred until this wall
+   *  clock if the original host hasn't reconnected. */
+  private hostReclaimDeadlineMs: number | null = null;
 
   private readonly send: SendFn;
   private readonly broadcast: BroadcastFn;
@@ -130,7 +138,18 @@ export class RoomState {
     const p = this.findPlayer(playerId);
     if (!p) return;
     p.connected = false;
-    if (this.hostPlayerId === playerId) this.promoteHost();
+    if (this.hostPlayerId === playerId) {
+      const hasOtherConnected = this.players.some(
+        (o) => o.playerId !== playerId && o.connected
+      );
+      if (hasOtherConnected) {
+        // Defer promotion — original host has a grace window to reconnect.
+        this.hostReclaimDeadlineMs = this.nowFn() + HOST_RECLAIM_GRACE_MS;
+        this.rescheduleAlarm();
+      } else {
+        this.promoteHost();
+      }
+    }
     this.broadcastState();
   }
 
@@ -160,6 +179,16 @@ export class RoomState {
   /** Called by the runtime when the previously scheduled alarm fires. */
   tick(): void {
     const now = this.nowFn();
+    // Process host reclaim first so phase transitions broadcast the final host.
+    if (this.hostReclaimDeadlineMs != null && now >= this.hostReclaimDeadlineMs) {
+      this.hostReclaimDeadlineMs = null;
+      const stillDisconnected =
+        this.hostPlayerId != null && !this.findPlayer(this.hostPlayerId)?.connected;
+      if (stillDisconnected) {
+        this.promoteHost();
+        this.broadcastState();
+      }
+    }
     if (this.phase === 'clue' && this.clueEndsAt != null && now >= this.clueEndsAt) {
       this.enterVote();
       return;
@@ -168,6 +197,8 @@ export class RoomState {
       this.tallyAndReveal();
       return;
     }
+    // No phase transition consumed the alarm; re-arm any remaining deadlines.
+    this.rescheduleAlarm();
   }
 
   /** Inspector for tests. Returns the canonical broadcast snapshot. */
@@ -187,6 +218,14 @@ export class RoomState {
       // Reconnect: re-attach to existing seat. Name is allowed to update.
       existing.connected = true;
       if (msg.name && msg.name.trim()) existing.name = msg.name.trim().slice(0, 32);
+      // Host reclaim: the original host returned inside the grace window.
+      if (
+        this.hostReclaimDeadlineMs != null &&
+        existing.playerId === this.hostPlayerId
+      ) {
+        this.hostReclaimDeadlineMs = null;
+        this.rescheduleAlarm();
+      }
       this.broadcastState();
       // Push private role if a round is in progress so the client can resume.
       if (this.round && this.phase !== 'lobby' && this.phase !== 'done') {
@@ -555,6 +594,16 @@ export class RoomState {
   private promoteHost(): void {
     const next = this.players.find((p) => p.connected);
     this.hostPlayerId = next ? next.playerId : (this.players[0]?.playerId ?? null);
+  }
+
+  /** Pick the earliest pending deadline (clue / vote timer / host reclaim) and
+   *  arm the single coalesced alarm for it. Null cancels. */
+  private rescheduleAlarm(): void {
+    const candidates: number[] = [];
+    if (this.phase === 'clue' && this.clueEndsAt != null) candidates.push(this.clueEndsAt);
+    if (this.phase === 'vote' && this.voteEndsAt != null) candidates.push(this.voteEndsAt);
+    if (this.hostReclaimDeadlineMs != null) candidates.push(this.hostReclaimDeadlineMs);
+    this.setAlarmFn(candidates.length > 0 ? Math.min(...candidates) : null);
   }
 
   private snapshot(): PublicRoomState {
