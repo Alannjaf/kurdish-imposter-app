@@ -40,6 +40,8 @@ export type UsePartyRoomResult = {
   send: (msg: C2S) => void;
   status: ConnectionStatus;
   lastError: string | null;
+  /** Exposed so features like voice-chat can subscribe to rtc_signal events. */
+  client: PartyClient | null;
 };
 
 const CHAT_BUFFER_LIMIT = 100;
@@ -136,7 +138,7 @@ export function usePartyRoom(opts: UsePartyRoomOptions): UsePartyRoomResult {
     // We intentionally re-run on code/host/name/asHost/avatar changes.
   }, [host, code, name, asHost, avatar]);
 
-  return { state, role, chat, send, status, lastError };
+  return { state, role, chat, send, status, lastError, client: clientRef.current };
 }
 
 export default usePartyRoom;

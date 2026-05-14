@@ -66,6 +66,7 @@ export type PartyClientEvents = {
   kicked: (reason: string) => void;
   connected: () => void;
   disconnected: () => void;
+  rtc_signal: (msg: Extract<S2C, { type: 'rtc_signal' }>) => void;
 };
 
 export type PartyClientOptions = {
@@ -239,6 +240,9 @@ export class PartyClient extends EventEmitter<PartyClientEvents> {
         break;
       case 'kicked':
         this.emit('kicked', msg.reason);
+        break;
+      case 'rtc_signal':
+        this.emit('rtc_signal', msg);
         break;
       default:
         // Unknown message type — ignore for forward-compat.

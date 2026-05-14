@@ -69,9 +69,17 @@ type Props = {
   send: (msg: C2S) => void;
   /** Optional chat — when omitted, ChatPanel is still mounted but starts empty. */
   chat?: ChatMessage[];
+  voice?: {
+    active: boolean;
+    muted: boolean;
+    available: boolean;
+    toggle: () => Promise<void>;
+    setMuted: (m: boolean) => void;
+    lastError: string | null;
+  };
 };
 
-export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
+export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
@@ -195,6 +203,60 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
                 {t('multiplayer.lobby.share_whatsapp')}
               </Text>
             </TouchableOpacity>
+            {voice?.available ? (
+              <TouchableOpacity
+                onPress={() => voice.toggle()}
+                accessibilityLabel="voice-toggle"
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 14,
+                  borderRadius: 999,
+                  backgroundColor: voice.active ? colors.pomegranate : colors.bgElev,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <Text style={{ fontSize: 14 }}>{voice.active ? '🎙️' : '🔇'}</Text>
+                <Text
+                  style={{
+                    color: voice.active ? '#FFFFFF' : colors.ink,
+                    fontFamily: family,
+                    fontSize: 13,
+                    fontWeight: '700',
+                  }}
+                >
+                  {voice.active
+                    ? t('multiplayer.lobby.voice_on')
+                    : t('multiplayer.lobby.voice_off')}
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+            {voice?.active ? (
+              <TouchableOpacity
+                onPress={() => voice.setMuted(!voice.muted)}
+                accessibilityLabel="voice-mute-toggle"
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 14,
+                  borderRadius: 999,
+                  backgroundColor: voice.muted ? colors.ink : colors.bgElev,
+                }}
+              >
+                <Text
+                  style={{
+                    color: voice.muted ? colors.bg : colors.ink,
+                    fontFamily: family,
+                    fontSize: 13,
+                    fontWeight: '700',
+                  }}
+                >
+                  {voice.muted
+                    ? t('multiplayer.lobby.unmute')
+                    : t('multiplayer.lobby.mute')}
+                </Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </Card>
 

@@ -68,7 +68,17 @@ export type C2S =
   | { type: 'steal_guess'; word: string; roundId: number }
   | { type: 'next_round' }
   | { type: 'chat'; text: string }
-  | { type: 'leave' };
+  | { type: 'leave' }
+  | {
+      /** Forwards a WebRTC signaling payload to one specific peer (mesh
+       *  voice). The server's only role is relaying — it never inspects
+       *  sdp/candidate contents. */
+      type: 'rtc_signal';
+      to: string; // target playerId
+      kind: 'offer' | 'answer' | 'ice';
+      sdp?: string;
+      candidate?: unknown;
+    };
 
 // Server → Client
 export type S2C =
@@ -76,7 +86,14 @@ export type S2C =
   | { type: 'role'; isImposter: boolean; word: string | null; roundId: number }
   | { type: 'chat'; fromSeat: number; fromName: string; text: string; ts: number }
   | { type: 'error'; code: ErrorCode; message: string }
-  | { type: 'kicked'; reason: string };
+  | { type: 'kicked'; reason: string }
+  | {
+      type: 'rtc_signal';
+      from: string; // sender playerId
+      kind: 'offer' | 'answer' | 'ice';
+      sdp?: string;
+      candidate?: unknown;
+    };
 
 export type ErrorCode =
   | 'room_full'

@@ -63,7 +63,14 @@ export type C2S =
   | { type: 'steal_guess'; word: string; roundId: number }
   | { type: 'next_round' }
   | { type: 'chat'; text: string }
-  | { type: 'leave' };
+  | { type: 'leave' }
+  | {
+      type: 'rtc_signal';
+      to: string;
+      kind: 'offer' | 'answer' | 'ice';
+      sdp?: string;
+      candidate?: unknown;
+    };
 
 // Server → Client
 export type S2C =
@@ -71,7 +78,14 @@ export type S2C =
   | { type: 'role'; isImposter: boolean; word: string | null; roundId: number }
   | { type: 'chat'; fromSeat: number; fromName: string; text: string; ts: number }
   | { type: 'error'; code: ErrorCode; message: string }
-  | { type: 'kicked'; reason: string };
+  | { type: 'kicked'; reason: string }
+  | {
+      type: 'rtc_signal';
+      from: string;
+      kind: 'offer' | 'answer' | 'ice';
+      sdp?: string;
+      candidate?: unknown;
+    };
 
 export type ErrorCode =
   | 'room_full'

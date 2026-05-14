@@ -176,7 +176,26 @@ export class RoomState {
         return this.handleChat(playerId, msg);
       case 'leave':
         return this.handleLeave(playerId);
+      case 'rtc_signal':
+        return this.handleRtcSignal(playerId, msg);
     }
+  }
+
+  /** Pure relay — server never inspects sdp/candidate. Routes the payload
+   *  to the addressed peer if they exist in the room. */
+  private handleRtcSignal(
+    senderId: string,
+    msg: Extract<C2S, { type: 'rtc_signal' }>
+  ): void {
+    if (!this.findPlayer(senderId)) return;
+    if (!this.findPlayer(msg.to)) return;
+    this.send(msg.to, {
+      type: 'rtc_signal',
+      from: senderId,
+      kind: msg.kind,
+      ...(msg.sdp !== undefined ? { sdp: msg.sdp } : {}),
+      ...(msg.candidate !== undefined ? { candidate: msg.candidate } : {}),
+    });
   }
 
   /** Called by the runtime when the previously scheduled alarm fires. */
