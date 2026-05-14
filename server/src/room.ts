@@ -267,20 +267,40 @@ export class RoomState {
   ): void {
     if (!this.requireHost(playerId)) return;
     if (!this.requirePhase(playerId, 'lobby')) return;
-    const cat = WORDS.categories.find((c) => c.key === msg.categoryKey);
-    if (!cat) {
-      this.send(playerId, {
-        type: 'error',
-        code: 'invalid_target',
-        message: `Unknown category ${msg.categoryKey}`,
-      });
-      return;
+    let customWords: { crew: string; imposter: string }[] | undefined;
+    if (msg.categoryKey === 'custom') {
+      const raw = Array.isArray(msg.customWords) ? msg.customWords : [];
+      customWords = raw
+        .map((p) => ({
+          crew: String(p?.crew ?? '').trim().slice(0, 60),
+          imposter: String(p?.imposter ?? p?.crew ?? '').trim().slice(0, 60),
+        }))
+        .filter((p) => p.crew.length > 0);
+      if (customWords.length < 5) {
+        this.send(playerId, {
+          type: 'error',
+          code: 'invalid_target',
+          message: 'Custom word list needs at least 5 pairs.',
+        });
+        return;
+      }
+    } else {
+      const cat = WORDS.categories.find((c) => c.key === msg.categoryKey);
+      if (!cat) {
+        this.send(playerId, {
+          type: 'error',
+          code: 'invalid_target',
+          message: `Unknown category ${msg.categoryKey}`,
+        });
+        return;
+      }
     }
     this.options = {
       categoryKey: msg.categoryKey,
       imposterCount: clamp(msg.imposterCount, 1, 3),
       roundSeconds: clamp(msg.roundSeconds, 30, 600),
       stealGuess: !!msg.stealGuess,
+      ...(customWords ? { customWords } : {}),
     };
     this.broadcastState();
   }
@@ -305,31 +325,48 @@ export class RoomState {
 
   private dealNewRound(): void {
     this.roundId += 1;
-    const cfg = {
-      playerCount: this.players.length,
-      imposterCount: clamp(this.options.imposterCount, 1, Math.max(1, this.players.length - 1)),
-      categoryKey: this.options.categoryKey,
-      roundSeconds: this.options.roundSeconds,
-      playerNames: this.players.map((p) => p.name),
-    };
-    // Seed `dealGame` with our injectable RNG so tests stay deterministic.
-    const origRandom = Math.random;
-    Math.random = this.rng;
-    let gs;
-    try {
-      gs = dealGame(cfg);
-    } finally {
-      Math.random = origRandom;
+    const imposterCount = clamp(this.options.imposterCount, 1, Math.max(1, this.players.length - 1));
+
+    let pair: { crew: string; imposter: string };
+    let category: { key: string; label_ku: string; label_en: string };
+    let imposterSeats: Set<number>;
+
+    if (this.options.categoryKey === 'custom' && this.options.customWords?.length) {
+      const list = this.options.customWords;
+      const chosen = list[Math.floor(this.rng() * list.length)];
+      pair = { crew: chosen.crew, imposter: chosen.imposter || chosen.crew };
+      category = { key: 'custom', label_ku: 'لیستی تایبەت', label_en: 'Custom' };
+      const order = this.players.map((_, i) => i).sort(() => this.rng() - 0.5);
+      imposterSeats = new Set(order.slice(0, imposterCount));
+    } else {
+      const cfg = {
+        playerCount: this.players.length,
+        imposterCount,
+        categoryKey: this.options.categoryKey,
+        roundSeconds: this.options.roundSeconds,
+        playerNames: this.players.map((p) => p.name),
+      };
+      const origRandom = Math.random;
+      Math.random = this.rng;
+      let gs;
+      try {
+        gs = dealGame(cfg);
+      } finally {
+        Math.random = origRandom;
+      }
+      const cat = pickCategory(this.options.categoryKey);
+      category = { key: cat.key, label_ku: cat.label_ku, label_en: cat.label_en };
+      pair = gs.pair;
+      imposterSeats = new Set<number>(
+        gs.assignments.filter((a) => a.isImposter).map((a) => a.index)
+      );
     }
-    const cat = pickCategory(this.options.categoryKey);
-    const imposterSeats = new Set<number>(
-      gs.assignments.filter((a) => a.isImposter).map((a) => a.index)
-    );
+
     this.round = {
       roundId: this.roundId,
-      pair: gs.pair,
+      pair,
       imposterSeats,
-      category: { key: cat.key, label_ku: cat.label_ku, label_en: cat.label_en },
+      category,
       votes: new Map(),
       result: undefined,
     };

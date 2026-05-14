@@ -36,7 +36,7 @@
 //   multiplayer.lobby.round_seconds.xlong
 
 import React, { useMemo, useState } from 'react';
-import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {
   Button,
   Card,
@@ -334,18 +334,35 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
             >
               {t('multiplayer.lobby.options.category')}
             </Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {WORDS.categories.map((cat) => {
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {[
+                ...WORDS.categories.map((cat) => ({
+                  key: cat.key,
+                  label:
+                    locale === 'ku'
+                      ? cat.label_ku
+                      : locale === 'en'
+                        ? cat.label_en
+                        : cat.label_ku,
+                })),
+                { key: 'custom', label: t('multiplayer.lobby.options.custom') },
+              ].map((cat) => {
                 const sel = cat.key === state.options.categoryKey;
-                const label =
-                  locale === 'ku' ? cat.label_ku : locale === 'en' ? cat.label_en : cat.label_ku;
                 return (
                   <TouchableOpacity
                     key={cat.key}
                     disabled={!isHost}
-                    onPress={() => updateOptions({ categoryKey: cat.key })}
+                    onPress={() =>
+                      cat.key === 'custom'
+                        ? updateOptions({
+                            categoryKey: 'custom',
+                            customWords: state.options.customWords ?? [],
+                          })
+                        : updateOptions({ categoryKey: cat.key })
+                    }
                     style={{
-                      flex: 1,
+                      minWidth: '46%',
+                      flexGrow: 1,
                       padding: 12,
                       borderRadius: 12,
                       backgroundColor: sel ? colors.ink : colors.bgElev,
@@ -362,12 +379,39 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
                         textAlign: 'center',
                       }}
                     >
-                      {label}
+                      {cat.label}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
+            {state.options.categoryKey === 'custom' && isHost ? (
+              <CustomWordsEditor
+                value={state.options.customWords ?? []}
+                onCommit={(pairs) =>
+                  updateOptions({ categoryKey: 'custom', customWords: pairs })
+                }
+                isRTL={isRTL}
+                family={family}
+                t={t}
+                colors={colors}
+              />
+            ) : null}
+            {state.options.categoryKey === 'custom' && !isHost ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.ink3,
+                  fontFamily: family,
+                  marginTop: 10,
+                  textAlign: isRTL ? 'right' : 'left',
+                }}
+              >
+                {t('multiplayer.lobby.options.custom_pairs_count', {
+                  n: state.options.customWords?.length ?? 0,
+                })}
+              </Text>
+            ) : null}
           </Card>
 
           {/* Imposter count */}
@@ -531,5 +575,80 @@ function roundSecondsLabel(s: number, t: (k: string) => string): string {
 }
 
 const AVATAR = ['#C24B33', '#2A285F', '#E5B458', '#8A8B47', '#A23A24', '#1B1A47'];
+
+// ---------------------------------------------------------------------------
+// Custom words editor — host enters pairs as "crew|imposter" one per line.
+
+function parseCustomWords(raw: string): { crew: string; imposter: string }[] {
+  return raw
+    .split(/\r?\n/)
+    .map((line) => {
+      const [crew = '', imposter = ''] = line.split('|');
+      return { crew: crew.trim(), imposter: imposter.trim() || crew.trim() };
+    })
+    .filter((p) => p.crew.length > 0);
+}
+
+function CustomWordsEditor({
+  value,
+  onCommit,
+  isRTL,
+  family,
+  t,
+  colors,
+}: {
+  value: { crew: string; imposter: string }[];
+  onCommit: (pairs: { crew: string; imposter: string }[]) => void;
+  isRTL: boolean;
+  family: string;
+  t: (k: string, vars?: Record<string, string | number>) => string;
+  colors: { ink: string; ink2: string; ink3: string; bgElev: string; line: string; pomegranate: string; olive: string };
+}) {
+  const initial = value.map((p) => `${p.crew}|${p.imposter}`).join('\n');
+  const [draft, setDraft] = useState(initial);
+  const parsed = useMemo(() => parseCustomWords(draft), [draft]);
+  const count = parsed.length;
+  const minReached = count >= 5;
+  return (
+    <View style={{ marginTop: 12, gap: 6 }}>
+      <Text style={{ fontSize: 12, color: colors.ink2, fontFamily: family, textAlign: isRTL ? 'right' : 'left' }}>
+        {t('multiplayer.lobby.options.custom_help')}
+      </Text>
+      <TextInput
+        value={draft}
+        onChangeText={setDraft}
+        onBlur={() => onCommit(parsed)}
+        multiline
+        numberOfLines={6}
+        placeholder={t('multiplayer.lobby.options.custom_placeholder')}
+        placeholderTextColor={colors.ink3}
+        style={{
+          minHeight: 120,
+          padding: 10,
+          borderRadius: 10,
+          backgroundColor: colors.bgElev,
+          borderWidth: 1,
+          borderColor: minReached ? colors.olive : colors.line,
+          fontFamily: family,
+          color: colors.ink,
+          fontSize: 14,
+          textAlign: isRTL ? 'right' : 'left',
+          textAlignVertical: 'top',
+        }}
+      />
+      <Text
+        style={{
+          fontSize: 12,
+          fontWeight: '600',
+          color: minReached ? colors.olive : colors.pomegranate,
+          fontFamily: family,
+          textAlign: isRTL ? 'right' : 'left',
+        }}
+      >
+        {t('multiplayer.lobby.options.custom_pairs_count', { n: count })}
+      </Text>
+    </View>
+  );
+}
 
 export default LobbyScreen;

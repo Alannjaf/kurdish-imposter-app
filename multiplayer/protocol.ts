@@ -8,6 +8,10 @@ export type RoomOptions = {
   imposterCount: number;
   roundSeconds: number;
   stealGuess: boolean;
+  /** Only used when categoryKey === 'custom'. Each pair is [crew, imposter]
+   *  (imposter may equal crew if the host wants the imposter to share the
+   *  word — uncommon but allowed). Minimum 5 pairs enforced by server. */
+  customWords?: { crew: string; imposter: string }[];
 };
 
 export type PublicPlayer = {
@@ -54,6 +58,7 @@ export type C2S =
       imposterCount: number;
       roundSeconds: number;
       stealGuess: boolean;
+      customWords?: { crew: string; imposter: string }[];
     }
   | { type: 'start' }
   | { type: 'to_vote' }

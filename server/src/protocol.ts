@@ -8,6 +8,7 @@ export type RoomOptions = {
   imposterCount: number;
   roundSeconds: number;
   stealGuess: boolean;
+  customWords?: { crew: string; imposter: string }[];
 };
 
 export type PublicPlayer = {
@@ -53,6 +54,7 @@ export type C2S =
       imposterCount: number;
       roundSeconds: number;
       stealGuess: boolean;
+      customWords?: { crew: string; imposter: string }[];
     }
   | { type: 'start' }
   | { type: 'to_vote' }
