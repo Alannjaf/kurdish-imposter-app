@@ -118,6 +118,8 @@
   "multiplayer.lobby.subtitle": "Get ready to play",
   "multiplayer.lobby.code_label": "Room code",
   "multiplayer.lobby.copy": "Copy",
+  "multiplayer.lobby.share_whatsapp": "WhatsApp",
+  "multiplayer.lobby.share_message": "Join my Kurdish Imposter room! Code: {code}\nhttps://alannjaf.github.io/kurdish-imposter/",
   "multiplayer.lobby.copied": "Copied!",
   "multiplayer.lobby.players_heading": "Players",
   "multiplayer.lobby.player_host": "Host",

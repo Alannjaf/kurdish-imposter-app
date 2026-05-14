@@ -118,6 +118,8 @@
   "multiplayer.lobby.subtitle": "استعد للعب",
   "multiplayer.lobby.code_label": "رمز الغرفة",
   "multiplayer.lobby.copy": "نسخ",
+  "multiplayer.lobby.share_whatsapp": "واتساب",
+  "multiplayer.lobby.share_message": "انضم إلى غرفتي في الدخيل! الرمز: {code}\nhttps://alannjaf.github.io/kurdish-imposter/",
   "multiplayer.lobby.copied": "تم النسخ!",
   "multiplayer.lobby.players_heading": "اللاعبون",
   "multiplayer.lobby.player_host": "المضيف",

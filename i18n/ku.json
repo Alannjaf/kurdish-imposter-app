@@ -118,6 +118,8 @@
   "multiplayer.lobby.subtitle": "خۆت ئامادە بکە بۆ یاری",
   "multiplayer.lobby.code_label": "کۆدی ژوور",
   "multiplayer.lobby.copy": "کۆپی",
+  "multiplayer.lobby.share_whatsapp": "واتساپ",
+  "multiplayer.lobby.share_message": "وەرە بۆ ژوورەکەی فێڵبازم! کۆد: {code}\nhttps://alannjaf.github.io/kurdish-imposter/",
   "multiplayer.lobby.copied": "کۆپی کرا!",
   "multiplayer.lobby.players_heading": "یاریزانەکان",
   "multiplayer.lobby.player_host": "خاوەن ژوور",

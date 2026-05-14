@@ -57,6 +57,7 @@ import {
   RoomOptions,
 } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { buildWhatsAppShareUrl } from '../shareLink';
 import type { ChatMessage } from '../__stub_usePartyRoom';
 
 const ROUND_SECONDS_OPTIONS = [60, 120, 180, 300] as const;
@@ -94,6 +95,18 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
+  };
+
+  const onShareWhatsApp = () => {
+    const body = t('multiplayer.lobby.share_message', { code: state.code });
+    const url = buildWhatsAppShareUrl(state.code, body);
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { Linking } = require('react-native');
+      Linking.openURL(url).catch(() => {});
+    }
   };
 
   const updateOptions = (patch: Partial<RoomOptions>) => {
@@ -136,27 +149,53 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
           >
             {state.code}
           </Text>
-          <TouchableOpacity
-            onPress={onCopy}
-            style={{
-              marginTop: 14,
-              paddingVertical: 8,
-              paddingHorizontal: 18,
-              borderRadius: 999,
-              backgroundColor: copied ? colors.olive : colors.bgElev,
-            }}
-          >
-            <Text
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+            <TouchableOpacity
+              onPress={onCopy}
               style={{
-                color: copied ? '#FFFFFF' : colors.ink,
-                fontFamily: family,
-                fontSize: 14,
-                fontWeight: '600',
+                paddingVertical: 8,
+                paddingHorizontal: 18,
+                borderRadius: 999,
+                backgroundColor: copied ? colors.olive : colors.bgElev,
               }}
             >
-              {copied ? t('multiplayer.lobby.copied') : t('multiplayer.lobby.copy')}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  color: copied ? '#FFFFFF' : colors.ink,
+                  fontFamily: family,
+                  fontSize: 14,
+                  fontWeight: '600',
+                }}
+              >
+                {copied ? t('multiplayer.lobby.copied') : t('multiplayer.lobby.copy')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onShareWhatsApp}
+              accessibilityLabel="share-whatsapp"
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 18,
+                borderRadius: 999,
+                backgroundColor: '#25D366',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <Text style={{ fontSize: 14 }}>💬</Text>
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontFamily: family,
+                  fontSize: 14,
+                  fontWeight: '700',
+                }}
+              >
+                {t('multiplayer.lobby.share_whatsapp')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </Card>
 
         {/* Players */}
