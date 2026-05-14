@@ -23,11 +23,9 @@ import { usePartyRoom } from './usePartyRoom';
 import { useThemeColors } from '../theme';
 import { useT } from '../i18n';
 
+// Must be literal `process.env.EXPO_PUBLIC_*` for Metro's static replacement.
 const PARTYKIT_HOST =
-  // expo public env var, falls back to local dev URL
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (typeof process !== 'undefined' && (process as any).env?.EXPO_PUBLIC_PARTYKIT_URL) ||
-  'http://127.0.0.1:1999';
+  process.env.EXPO_PUBLIC_PARTYKIT_URL || 'http://127.0.0.1:1999';
 
 function randomRoomCode(): string {
   const a = ROOM_CODE_ALPHABET;
