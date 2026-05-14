@@ -11,6 +11,7 @@ export type RoomOptions = {
 };
 
 export type PublicPlayer = {
+  /** Zero-indexed seat assigned by the server in hello-arrival order. */
   seat: number;
   playerId: string;
   name: string;

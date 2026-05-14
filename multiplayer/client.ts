@@ -158,7 +158,12 @@ export class PartyClient extends EventEmitter<PartyClientEvents> {
       this.ws = null;
     }
     if (!this.roomCode) return;
-    const url = `${this.host}/parties/main/${this.roomCode}`;
+    // ?_pk pins PartyKit's connection id to our persisted playerId. Without it,
+    // PartyKit assigns a fresh UUID per WebSocket, and server.handleHello
+    // (which keys identity off the PartyKit conn id, not msg.playerId) treats
+    // every reconnect as a new player — losing host status, seat, and role.
+    const pk = encodeURIComponent(this.playerId ?? '');
+    const url = `${this.host}/parties/main/${this.roomCode}?_pk=${pk}`;
     const ws = new this.WS(url);
     this.ws = ws;
 
