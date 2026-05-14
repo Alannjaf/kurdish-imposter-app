@@ -431,12 +431,16 @@ export class RoomState {
     // Tie rule: imposter wins regardless of who was accused.
     const winners: 'civilians' | 'imposter' =
       isTie ? 'imposter' : accusedWasImposter ? 'civilians' : 'imposter';
+    const voteBreakdown = [...this.round.votes.entries()]
+      .map(([voterSeat, targetSeat]) => ({ voterSeat, targetSeat }))
+      .sort((a, b) => a.voterSeat - b.voterSeat);
     const result: RoundResult = {
       accusedSeat,
       accusedWasImposter,
       word: this.round.pair.crew,
       imposterSeats: [...this.round.imposterSeats].sort((a, b) => a - b),
       winners,
+      voteBreakdown,
     };
     this.round.result = result;
     this.phase = 'reveal';

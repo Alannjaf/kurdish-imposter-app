@@ -271,6 +271,85 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
           </Text>
         </View>
 
+        {/* Vote matrix — who voted whom */}
+        {result.voteBreakdown && result.voteBreakdown.length > 0 ? (
+          <View
+            style={{
+              backgroundColor: wordCardBg,
+              borderRadius: 18,
+              padding: 16,
+              marginBottom: 14,
+              borderWidth: 1,
+              borderColor: wordCardBorder,
+            }}
+          >
+            <Text
+              style={{
+                color: subInk2,
+                fontFamily: family,
+                fontSize: 11,
+                fontWeight: '700',
+                letterSpacing: locale === 'en' ? 1.6 : 0,
+                textTransform: locale === 'en' ? 'uppercase' : 'none',
+                marginBottom: 10,
+              }}
+            >
+              {t('multiplayer.reveal.votes_label')}
+            </Text>
+            <View style={{ gap: 6 }}>
+              {result.voteBreakdown.map((v, i) => {
+                const voter = state.players.find((p) => p.seat === v.voterSeat);
+                const target = state.players.find((p) => p.seat === v.targetSeat);
+                if (!voter || !target) return null;
+                return (
+                  <View
+                    key={`vb-${i}`}
+                    style={{
+                      flexDirection: isRTL ? 'row-reverse' : 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: family,
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: ink,
+                        flex: 1,
+                        textAlign: isRTL ? 'right' : 'left',
+                      }}
+                    >
+                      {voter.name}
+                    </Text>
+                    <Text
+                      style={{
+                        color: subInk2,
+                        fontSize: 14,
+                        fontFamily: family,
+                      }}
+                    >
+                      {isRTL ? '←' : '→'}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: family,
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: result.imposterSeats.includes(v.targetSeat) ? colors.pomegranate : ink,
+                        flex: 1,
+                        textAlign: isRTL ? 'left' : 'right',
+                      }}
+                    >
+                      {target.name}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        ) : null}
+
         {/* Steal-guess input — only for the caught imposter, only if not yet used */}
         {isCaughtImposter ? (
           <StealGuessCard

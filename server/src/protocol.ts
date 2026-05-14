@@ -24,6 +24,8 @@ export type RoundResult = {
   imposterSeats: number[];
   stealGuessUsed?: { word: string; correct: boolean };
   winners: 'civilians' | 'imposter';
+  /** Full voter→target breakdown for the "who voted whom" reveal display. */
+  voteBreakdown?: { voterSeat: number; targetSeat: number }[];
 };
 
 export type PublicRoomState = {

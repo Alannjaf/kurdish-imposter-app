@@ -168,6 +168,7 @@
   "multiplayer.reveal.imposter_label_singular": "الدخيل",
   "multiplayer.reveal.imposter_label_plural": "الدخلاء",
   "multiplayer.reveal.word_was": "الكلمة كانت",
+  "multiplayer.reveal.votes_label": "من صوّت لمن",
   "multiplayer.reveal.steal.title": "فرصة أخيرة لسرقة الفوز",
   "multiplayer.reveal.steal.subtitle": "خمّن الكلمة السرية لقلب نتيجة الجولة.",
   "multiplayer.reveal.steal.placeholder": "اكتب تخمينك",
