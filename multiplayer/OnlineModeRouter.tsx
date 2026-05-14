@@ -128,6 +128,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
       return (
         <OnlineClueScreen
           state={room.state}
+          role={room.role}
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}
@@ -137,6 +138,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
       return (
         <OnlineVoteScreen
           state={room.state}
+          role={room.role}
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}

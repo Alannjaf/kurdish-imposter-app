@@ -18,14 +18,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Button, Eyebrow, KilimBg, Pill } from '../../ui';
-import { fonts, useThemeColors } from '../../theme';
+import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
-import type { ChatMessage } from '../__stub_usePartyRoom';
+import type { ChatMessage, RoleInfo } from '../__stub_usePartyRoom';
 
 type Props = {
   state: PublicRoomState;
+  /** Private role/word — visible to this player only. Persisted across deal→clue→vote. */
+  role: RoleInfo | null;
   myPlayerId: string;
   send: (msg: C2S) => void;
   chat?: ChatMessage[];
@@ -33,7 +35,7 @@ type Props = {
   nowFn?: () => number;
 };
 
-export function OnlineClueScreen({ state, myPlayerId, send, chat = [], nowFn }: Props) {
+export function OnlineClueScreen({ state, role, myPlayerId, send, chat = [], nowFn }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
@@ -82,6 +84,46 @@ export function OnlineClueScreen({ state, myPlayerId, send, chat = [], nowFn }: 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
       <KilimBg color={colors.ink} opacity={0.05} />
+
+      {/* Persistent role/word badge — server auto-advances deal→clue too fast for
+          users to read the reveal screen, so we keep it visible through the round. */}
+      {role ? (
+        <View
+          style={{
+            marginHorizontal: 24,
+            marginBottom: 12,
+            padding: 14,
+            borderRadius: 14,
+            backgroundColor: role.isImposter ? PALETTES.dark.indigoDark : colors.bgElev,
+            borderWidth: role.isImposter ? 0 : 1,
+            borderColor: colors.ink3,
+            alignItems: 'center',
+          }}
+        >
+          <Eyebrow
+            style={{
+              marginBottom: 4,
+              color: role.isImposter ? '#E89384' : colors.ink2,
+            }}
+          >
+            {role.isImposter
+              ? t('multiplayer.deal.imposter_word')
+              : t('multiplayer.deal.your_word_label')}
+          </Eyebrow>
+          {!role.isImposter && role.word ? (
+            <Text
+              style={{
+                fontFamily: locale === 'en' ? fonts.display : fonts.arabicDisplay,
+                fontSize: 24,
+                fontWeight: '700',
+                color: colors.ink,
+              }}
+            >
+              {role.word}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View
         style={{

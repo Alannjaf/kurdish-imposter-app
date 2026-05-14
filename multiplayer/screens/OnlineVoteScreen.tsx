@@ -24,23 +24,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Button, Display, Eyebrow, KilimBg } from '../../ui';
-import { fonts, useThemeColors } from '../../theme';
+import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
-import type { ChatMessage } from '../__stub_usePartyRoom';
+import type { ChatMessage, RoleInfo } from '../__stub_usePartyRoom';
 
 const AVATAR = ['#C24B33', '#2A285F', '#E5B458', '#8A8B47', '#A23A24', '#1B1A47'];
 
 type Props = {
   state: PublicRoomState;
+  /** Private role/word — visible to this player only. */
+  role: RoleInfo | null;
   myPlayerId: string;
   send: (msg: C2S) => void;
   chat?: ChatMessage[];
   nowFn?: () => number;
 };
 
-export function OnlineVoteScreen({ state, myPlayerId, send, chat = [], nowFn }: Props) {
+export function OnlineVoteScreen({ state, role, myPlayerId, send, chat = [], nowFn }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale } = useLocale();
@@ -96,6 +98,53 @@ export function OnlineVoteScreen({ state, myPlayerId, send, chat = [], nowFn }: 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
       <KilimBg color={colors.ink} opacity={0.04} />
+
+      {/* Persistent role/word reminder — same as clue screen. */}
+      {role ? (
+        <View
+          style={{
+            marginHorizontal: 24,
+            marginBottom: 10,
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 12,
+            backgroundColor: role.isImposter ? PALETTES.dark.indigoDark : colors.bgElev,
+            borderWidth: role.isImposter ? 0 : 1,
+            borderColor: colors.ink3,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: '700',
+              letterSpacing: locale === 'en' ? 1.2 : 0,
+              textTransform: locale === 'en' ? 'uppercase' : 'none',
+              color: role.isImposter ? '#E89384' : colors.ink2,
+              fontFamily: family,
+            }}
+          >
+            {role.isImposter
+              ? t('multiplayer.deal.imposter_word')
+              : t('multiplayer.deal.your_word_label')}
+          </Text>
+          {!role.isImposter && role.word ? (
+            <Text
+              style={{
+                fontFamily: locale === 'en' ? fonts.display : fonts.arabicDisplay,
+                fontSize: 18,
+                fontWeight: '700',
+                color: colors.ink,
+              }}
+            >
+              · {role.word}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={{ paddingHorizontal: 24, paddingBottom: 4 }}>
         <Eyebrow>{t('multiplayer.vote.subtitle')}</Eyebrow>
