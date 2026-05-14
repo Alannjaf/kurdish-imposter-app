@@ -155,9 +155,10 @@ export function ChatPanel({ chat, send, mySeat }: Props) {
             borderTopRightRadius: 22,
             borderTopWidth: 1,
             borderColor: colors.line,
-            // Cap height so the panel never exceeds ~60% of screen — leaves
-            // the active phase visible above.
-            maxHeight: '70%',
+            // Fixed height so the messages list always has room to scroll,
+            // even when only one or two messages exist. The active phase
+            // stays visible above the panel.
+            height: '70%',
             shadowColor: '#000',
             shadowOpacity: 0.18,
             shadowOffset: { width: 0, height: -3 },
@@ -208,7 +209,7 @@ export function ChatPanel({ chat, send, mySeat }: Props) {
             ref={(r) => {
               scrollRef.current = r;
             }}
-            style={{ paddingHorizontal: 14 }}
+            style={{ flex: 1, paddingHorizontal: 14 }}
             contentContainerStyle={{ paddingVertical: 12, gap: 8 }}
           >
             {visible.length === 0 ? (
