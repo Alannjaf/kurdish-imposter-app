@@ -41,6 +41,7 @@ export const SAMPLE_LOBBY: PublicRoomState = {
   options: OPTIONS,
   players: PLAYERS,
   roundId: 0,
+  scores: { p1: 0, p2: 0, p3: 0, p4: 0, p5: 0 },
 };
 
 export const SAMPLE_DEAL: PublicRoomState = {
@@ -51,6 +52,7 @@ export const SAMPLE_DEAL: PublicRoomState = {
   players: PLAYERS,
   category: CATEGORY,
   roundId: 1,
+  scores: { p1: 0, p2: 0, p3: 0, p4: 0, p5: 0 },
 };
 
 export const SAMPLE_CLUE: PublicRoomState = {
@@ -62,6 +64,7 @@ export const SAMPLE_CLUE: PublicRoomState = {
   category: CATEGORY,
   clueEndsAt: NOW + 90_000, // 90s remaining
   roundId: 1,
+  scores: { p1: 0, p2: 0, p3: 0, p4: 0, p5: 0 },
 };
 
 export const SAMPLE_VOTE: PublicRoomState = {
@@ -74,6 +77,7 @@ export const SAMPLE_VOTE: PublicRoomState = {
   votesCast: 2,
   voteEndsAt: NOW + 22_000, // 22s remaining
   roundId: 1,
+  scores: { p1: 0, p2: 0, p3: 0, p4: 0, p5: 0 },
 };
 
 export const SAMPLE_REVEAL_CIVS_WIN: PublicRoomState = {
@@ -91,6 +95,7 @@ export const SAMPLE_REVEAL_CIVS_WIN: PublicRoomState = {
     winners: 'civilians',
   },
   roundId: 1,
+  scores: { p1: 1, p2: 1, p3: 0, p4: 1, p5: 0 },
 };
 
 export const SAMPLE_REVEAL_IMPOSTER_WIN: PublicRoomState = {
@@ -108,6 +113,7 @@ export const SAMPLE_REVEAL_IMPOSTER_WIN: PublicRoomState = {
     winners: 'imposter',
   },
   roundId: 1,
+  scores: { p1: 0, p2: 0, p3: 1, p4: 0, p5: 0 },
 };
 
 // Role samples (private — would be received via S2C 'role' message).

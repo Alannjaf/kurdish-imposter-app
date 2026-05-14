@@ -211,6 +211,7 @@ describe('PartyClient', () => {
           { seat: 0, playerId: 'p1', name: 'D', connected: true },
         ],
         roundId: 0,
+        scores: { p1: 0 },
       },
     };
     ws.simulateMessage(snapshot);

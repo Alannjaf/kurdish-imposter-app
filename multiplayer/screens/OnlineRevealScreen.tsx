@@ -350,6 +350,72 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
           </View>
         ) : null}
 
+        {/* Leaderboard — cumulative wins across rounds in this room */}
+        {Object.values(state.scores ?? {}).some((s) => s > 0) ? (
+          <View
+            style={{
+              backgroundColor: wordCardBg,
+              borderRadius: 18,
+              padding: 16,
+              marginBottom: 14,
+              borderWidth: 1,
+              borderColor: wordCardBorder,
+            }}
+          >
+            <Text
+              style={{
+                color: subInk2,
+                fontFamily: family,
+                fontSize: 11,
+                fontWeight: '700',
+                letterSpacing: locale === 'en' ? 1.6 : 0,
+                textTransform: locale === 'en' ? 'uppercase' : 'none',
+                marginBottom: 10,
+              }}
+            >
+              {t('multiplayer.reveal.leaderboard_label')}
+            </Text>
+            <View style={{ gap: 6 }}>
+              {[...state.players]
+                .map((p) => ({ ...p, score: state.scores?.[p.playerId] ?? 0 }))
+                .sort((a, b) => b.score - a.score || a.seat - b.seat)
+                .map((p) => (
+                  <View
+                    key={`lb-${p.playerId}`}
+                    style={{
+                      flexDirection: isRTL ? 'row-reverse' : 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: family,
+                        fontSize: 14,
+                        fontWeight: '600',
+                        color: ink,
+                        flex: 1,
+                        textAlign: isRTL ? 'right' : 'left',
+                      }}
+                    >
+                      {p.name}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: display,
+                        fontSize: 16,
+                        fontWeight: '800',
+                        color: p.score > 0 ? colors.olive : subInk2,
+                      }}
+                    >
+                      🏆 {p.score}
+                    </Text>
+                  </View>
+                ))}
+            </View>
+          </View>
+        ) : null}
+
         {/* Steal-guess input — only for the caught imposter, only if not yet used */}
         {isCaughtImposter ? (
           <StealGuessCard

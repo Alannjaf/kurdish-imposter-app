@@ -171,6 +171,7 @@
   "multiplayer.reveal.imposter_label_plural": "The Imposters",
   "multiplayer.reveal.word_was": "The word was",
   "multiplayer.reveal.votes_label": "Who voted whom",
+  "multiplayer.reveal.leaderboard_label": "Leaderboard",
   "multiplayer.reveal.steal.title": "Last chance to steal it",
   "multiplayer.reveal.steal.subtitle": "Guess the secret word to flip the win.",
   "multiplayer.reveal.steal.placeholder": "Type your guess",

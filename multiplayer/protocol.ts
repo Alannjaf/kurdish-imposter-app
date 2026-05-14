@@ -41,6 +41,8 @@ export type PublicRoomState = {
   clueEndsAt?: number;
   result?: RoundResult;
   roundId: number;
+  /** Cumulative wins per playerId across rounds played in this room. */
+  scores: Record<string, number>;
 };
 
 // Client → Server

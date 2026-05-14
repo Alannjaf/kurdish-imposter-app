@@ -171,6 +171,7 @@
   "multiplayer.reveal.imposter_label_plural": "فێڵبازەکان",
   "multiplayer.reveal.word_was": "وشەکە بوو",
   "multiplayer.reveal.votes_label": "کێ دەنگی بۆ کێ دا",
+  "multiplayer.reveal.leaderboard_label": "خشتەی پێشەکی",
   "multiplayer.reveal.steal.title": "دواهەمین هەلت بۆ ڕفاندنی بردنەوە",
   "multiplayer.reveal.steal.subtitle": "وشە نهێنییەکە پێشبینی بکە بۆ ئەوەی بردنەوەکە بگۆڕیت.",
   "multiplayer.reveal.steal.placeholder": "پێشبینییەکەت بنووسە",

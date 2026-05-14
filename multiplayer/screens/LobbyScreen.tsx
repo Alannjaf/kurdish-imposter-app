@@ -274,6 +274,13 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [] }: Props) {
                   >
                     {p.name}
                   </Text>
+                  {state.scores?.[p.playerId] > 0 ? (
+                    <Pill style={{ backgroundColor: colors.olive }}>
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFF' }}>
+                        🏆 {state.scores[p.playerId]}
+                      </Text>
+                    </Pill>
+                  ) : null}
                   {isThisHost ? (
                     <Pill style={{ backgroundColor: colors.gold }}>
                       <Text style={{ fontSize: 11, fontWeight: '700', color: colors.indigoDark }}>

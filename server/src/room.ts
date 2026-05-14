@@ -106,6 +106,8 @@ export class RoomState {
   /** When set, a host's WS just dropped — promotion deferred until this wall
    *  clock if the original host hasn't reconnected. */
   private hostReclaimDeadlineMs: number | null = null;
+  /** Cumulative wins per playerId for the lifetime of this room. */
+  private scores: Map<string, number> = new Map();
 
   private readonly send: SendFn;
   private readonly broadcast: BroadcastFn;
@@ -446,8 +448,28 @@ export class RoomState {
     this.phase = 'reveal';
     this.voteEndsAt = null;
     this.clueEndsAt = null;
+    this.applyRoundScores(null);
     this.broadcastState();
     this.setAlarmFn(null);
+  }
+
+  /** Increment cumulative wins for the round-winning team. If `prevWinners`
+   *  is non-null, undo that prior application first (used when steal-guess
+   *  flips the result mid-reveal). */
+  private applyRoundScores(prevWinners: 'civilians' | 'imposter' | null): void {
+    if (!this.round?.result) return;
+    const imposters = this.round.imposterSeats;
+    const apply = (winners: 'civilians' | 'imposter', sign: 1 | -1) => {
+      for (const p of this.players) {
+        const wasImposter = imposters.has(p.seat);
+        const won = winners === 'imposter' ? wasImposter : !wasImposter;
+        if (won) {
+          this.scores.set(p.playerId, (this.scores.get(p.playerId) ?? 0) + sign);
+        }
+      }
+    };
+    if (prevWinners) apply(prevWinners, -1);
+    apply(this.round.result.winners, 1);
   }
 
   // -------------------------------------------------------------------------
@@ -501,7 +523,10 @@ export class RoomState {
     const truth = this.round.pair.crew.trim().toLowerCase();
     const correct = guess.length > 0 && guess === truth;
     this.round.result.stealGuessUsed = { word: msg.word, correct };
-    if (correct) this.round.result.winners = 'imposter';
+    if (correct) {
+      this.round.result.winners = 'imposter';
+      this.applyRoundScores('civilians');
+    }
     this.broadcastState();
   }
 
@@ -617,6 +642,10 @@ export class RoomState {
       name: p.name,
       connected: p.connected,
     }));
+    const scores: Record<string, number> = {};
+    for (const p of this.players) {
+      scores[p.playerId] = this.scores.get(p.playerId) ?? 0;
+    }
     const state: PublicRoomState = {
       code: this.code,
       hostPlayerId: this.hostPlayerId ?? '',
@@ -624,6 +653,7 @@ export class RoomState {
       options: { ...this.options },
       players: publicPlayers,
       roundId: this.roundId,
+      scores,
     };
     if (this.round && this.phase !== 'lobby') {
       state.category = { ...this.round.category };
