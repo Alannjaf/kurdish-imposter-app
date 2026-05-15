@@ -74,6 +74,21 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
     return '';
   }, [room.state, session.name]);
 
+  // Hooks must run unconditionally — compute peers + voice handle BEFORE any
+  // early return for the loading screen below.
+  const peerIds = useMemo(
+    () =>
+      (room.state?.players ?? [])
+        .map((p) => p.playerId)
+        .filter((id) => id !== myPlayerId),
+    [room.state, myPlayerId]
+  );
+  const voice = useVoiceChat({
+    client: room.client,
+    myPlayerId,
+    peers: peerIds,
+  });
+
   // Connection / loading screen.
   if (!room.state) {
     return (
@@ -102,19 +117,6 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
 
   const send = room.send;
   const phase = room.state.phase;
-
-  const peerIds = useMemo(
-    () =>
-      room.state!.players
-        .map((p) => p.playerId)
-        .filter((id) => id !== myPlayerId),
-    [room.state, myPlayerId]
-  );
-  const voice = useVoiceChat({
-    client: room.client,
-    myPlayerId,
-    peers: peerIds,
-  });
 
   // ChatPanel is rendered above each phase screen via composition inside
   // each child; passing `chat` props through avoids a global overlay layer
