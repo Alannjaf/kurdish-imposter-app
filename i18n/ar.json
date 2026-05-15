@@ -212,5 +212,11 @@
   "multiplayer.errors.reconnecting": "إعادة الاتصال…",
   "multiplayer.status.connecting": "جارٍ الاتصال…",
   "multiplayer.status.connected": "متصل",
-  "multiplayer.status.disconnected": "غير متصل"
+  "multiplayer.status.disconnected": "غير متصل",
+  "multiplayer.room.leave": "مغادرة الغرفة",
+  "multiplayer.room.leave_confirm_title": "هل تريد مغادرة هذه الغرفة؟",
+  "multiplayer.room.leave_confirm_body_lobby": "ستعود إلى الشاشة الرئيسية. سيبقى اللاعبون الآخرون.",
+  "multiplayer.room.leave_confirm_body_active": "جولة قيد التشغيل الآن. مغادرتك تعني أن البقية سيكملون اللعب بدونك.",
+  "multiplayer.room.leave_confirm_yes": "مغادرة",
+  "multiplayer.room.leave_confirm_cancel": "البقاء"
 }

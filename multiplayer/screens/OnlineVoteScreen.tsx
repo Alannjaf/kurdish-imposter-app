@@ -28,6 +28,7 @@ import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { LeaveRoomButton } from './LeaveRoomButton';
 import type { ChatMessage, RoleInfo } from '../__stub_usePartyRoom';
 
 const AVATAR = ['#C24B33', '#2A285F', '#E5B458', '#8A8B47', '#A23A24', '#1B1A47'];
@@ -40,9 +41,11 @@ type Props = {
   send: (msg: C2S) => void;
   chat?: ChatMessage[];
   nowFn?: () => number;
+  /** Confirmed "Leave room" → routes user back to OnlineHomeScreen. */
+  onLeave?: () => void;
 };
 
-export function OnlineVoteScreen({ state, role, myPlayerId, send, chat = [], nowFn }: Props) {
+export function OnlineVoteScreen({ state, role, myPlayerId, send, chat = [], nowFn, onLeave }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale } = useLocale();
@@ -98,6 +101,11 @@ export function OnlineVoteScreen({ state, role, myPlayerId, send, chat = [], now
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
       <KilimBg color={colors.ink} opacity={0.04} />
+      {onLeave ? (
+        <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+          <LeaveRoomButton onLeave={onLeave} mode="active" />
+        </View>
+      ) : null}
 
       {/* Persistent role/word reminder — same as clue screen. */}
       {role ? (

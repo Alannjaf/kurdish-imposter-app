@@ -212,5 +212,11 @@
   "multiplayer.errors.reconnecting": "Reconnecting…",
   "multiplayer.status.connecting": "Connecting…",
   "multiplayer.status.connected": "Connected",
-  "multiplayer.status.disconnected": "Disconnected"
+  "multiplayer.status.disconnected": "Disconnected",
+  "multiplayer.room.leave": "Leave room",
+  "multiplayer.room.leave_confirm_title": "Leave this room?",
+  "multiplayer.room.leave_confirm_body_lobby": "You'll go back to the home screen. Other players will stay.",
+  "multiplayer.room.leave_confirm_body_active": "A round is in progress. Leaving now means the others will keep playing without you.",
+  "multiplayer.room.leave_confirm_yes": "Leave",
+  "multiplayer.room.leave_confirm_cancel": "Stay"
 }

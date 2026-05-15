@@ -212,5 +212,11 @@
   "multiplayer.errors.reconnecting": "گەڕانەوەی پەیوەندی…",
   "multiplayer.status.connecting": "پەیوەندی دەکات…",
   "multiplayer.status.connected": "پەیوەندی هەیە",
-  "multiplayer.status.disconnected": "پەیوەندی پچڕاوە"
+  "multiplayer.status.disconnected": "پەیوەندی پچڕاوە",
+  "multiplayer.room.leave": "بەجێهێشتنی ژوور",
+  "multiplayer.room.leave_confirm_title": "دەتەوێت ئەم ژوورە بەجێبهێڵیت؟",
+  "multiplayer.room.leave_confirm_body_lobby": "دەگەڕێیتەوە بۆ شاشەی سەرەکی. یاریزانانی تر دەمێننەوە.",
+  "multiplayer.room.leave_confirm_body_active": "خولێک لە بەردەواوبوونە. ئەگەر بەجێی بهێڵیت، یاریزانانی دیکە بەبێ تۆ یاری دەکەن.",
+  "multiplayer.room.leave_confirm_yes": "بەجێهێشتن",
+  "multiplayer.room.leave_confirm_cancel": "مانەوە"
 }

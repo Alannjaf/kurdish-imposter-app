@@ -51,10 +51,24 @@ export function OnlineModeRouter({ onExit }: { onExit: () => void }) {
     return <OnlineHomeScreen onJoin={handleJoin} onBack={onExit} />;
   }
 
-  return <RoomShell session={session} onExit={onExit} />;
+  // Drop the session — RoomShell unmounts, its WebSocket tears down, and the
+  // OnlineHomeScreen re-renders so the user can create / join another room.
+  const handleLeaveRoom = () => setSession(null);
+
+  return <RoomShell session={session} onLeaveRoom={handleLeaveRoom} />;
 }
 
-function RoomShell({ session, onExit }: { session: Session; onExit: () => void }) {
+function RoomShell({
+  session,
+  onLeaveRoom,
+}: {
+  session: Session;
+  /** Called after the user confirms "Leave room". RoomShell sends the leave
+   *  message + tears down its WebSocket on next render via unmount; this
+   *  callback is what asks OnlineModeRouter to drop the session and route
+   *  back to OnlineHomeScreen. */
+  onLeaveRoom: () => void;
+}) {
   const t = useT();
   const colors = useThemeColors();
   const room = usePartyRoom({
@@ -64,6 +78,17 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
     asHost: session.asHost,
     avatar: session.avatar,
   });
+
+  const handleLeave = React.useCallback(() => {
+    // Best-effort tell the server we're leaving so it can clean us up
+    // before our WS closes; works even if the connection is mid-tear-down.
+    try {
+      room.send?.({ type: 'leave' });
+    } catch {
+      // ignore — the unmount below disconnects either way
+    }
+    onLeaveRoom();
+  }, [room, onLeaveRoom]);
 
   const myPlayerId = useMemo(() => {
     // The hook persists playerId via AsyncStorage; surface it from the state if available.
@@ -130,6 +155,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
           send={send}
           chat={room.chat}
           voice={voice}
+          onLeave={handleLeave}
         />
       );
     case 'deal':
@@ -140,6 +166,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}
+          onLeave={handleLeave}
         />
       );
     case 'clue':
@@ -150,6 +177,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}
+          onLeave={handleLeave}
         />
       );
     case 'vote':
@@ -160,6 +188,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}
+          onLeave={handleLeave}
         />
       );
     case 'reveal':
@@ -169,6 +198,7 @@ function RoomShell({ session, onExit }: { session: Session; onExit: () => void }
           myPlayerId={myPlayerId}
           send={send}
           chat={room.chat}
+          onLeave={handleLeave}
         />
       );
     case 'done':

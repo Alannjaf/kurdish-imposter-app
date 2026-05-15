@@ -36,6 +36,7 @@ import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { LeaveRoomButton } from './LeaveRoomButton';
 import { exportResultCardAsPng } from '../resultCard';
 import type { ChatMessage } from '../__stub_usePartyRoom';
 
@@ -44,9 +45,11 @@ type Props = {
   myPlayerId: string;
   send: (msg: C2S) => void;
   chat?: ChatMessage[];
+  /** Confirmed "Leave room" → routes user back to OnlineHomeScreen. */
+  onLeave?: () => void;
 };
 
-export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props) {
+export function OnlineRevealScreen({ state, myPlayerId, send, chat = [], onLeave }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
@@ -62,6 +65,11 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
   if (!result) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
+        {onLeave ? (
+          <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+            <LeaveRoomButton onLeave={onLeave} mode="active" />
+          </View>
+        ) : null}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ color: colors.ink2, fontFamily: family }}>…</Text>
         </View>
@@ -105,6 +113,11 @@ export function OnlineRevealScreen({ state, myPlayerId, send, chat = [] }: Props
         opacity={groupWon ? 0.05 : 0.1}
         size={50}
       />
+      {onLeave ? (
+        <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+          <LeaveRoomButton onLeave={onLeave} mode="lobby" />
+        </View>
+      ) : null}
 
       <View style={{ paddingHorizontal: 24 }}>
         <Pill style={{ backgroundColor: groupWon ? colors.bgElev : 'rgba(255,255,255,0.1)' }}>

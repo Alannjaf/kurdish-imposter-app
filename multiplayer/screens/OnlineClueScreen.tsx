@@ -22,6 +22,7 @@ import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { LeaveRoomButton } from './LeaveRoomButton';
 import type { ChatMessage, RoleInfo } from '../__stub_usePartyRoom';
 
 type Props = {
@@ -33,9 +34,11 @@ type Props = {
   chat?: ChatMessage[];
   /** Override `Date.now()` for tests / fixtures. */
   nowFn?: () => number;
+  /** Confirmed "Leave room" → routes user back to OnlineHomeScreen. */
+  onLeave?: () => void;
 };
 
-export function OnlineClueScreen({ state, role, myPlayerId, send, chat = [], nowFn }: Props) {
+export function OnlineClueScreen({ state, role, myPlayerId, send, chat = [], nowFn, onLeave }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
@@ -84,6 +87,11 @@ export function OnlineClueScreen({ state, role, myPlayerId, send, chat = [], now
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
       <KilimBg color={colors.ink} opacity={0.05} />
+      {onLeave ? (
+        <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+          <LeaveRoomButton onLeave={onLeave} mode="active" />
+        </View>
+      ) : null}
 
       {/* Persistent role/word badge — server auto-advances deal→clue too fast for
           users to read the reveal screen, so we keep it visible through the round. */}

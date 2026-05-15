@@ -57,6 +57,7 @@ import {
   RoomOptions,
 } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { LeaveRoomButton } from './LeaveRoomButton';
 import { buildWhatsAppShareUrl } from '../shareLink';
 import type { ChatMessage } from '../__stub_usePartyRoom';
 
@@ -84,9 +85,11 @@ type Props = {
     /** Resume blocked audio elements. Must be called from a user gesture. */
     unblockAudio?: () => Promise<void>;
   };
+  /** Confirmed "Leave room" → routes user back to OnlineHomeScreen. */
+  onLeave?: () => void;
 };
 
-export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props) {
+export function LobbyScreen({ state, myPlayerId, send, chat = [], voice, onLeave }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale, isRTL } = useLocale();
@@ -145,6 +148,7 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
+        {onLeave ? <LeaveRoomButton onLeave={onLeave} mode="lobby" /> : null}
         <Eyebrow>{t('multiplayer.lobby.subtitle')}</Eyebrow>
         <Display style={{ fontSize: 30, color: colors.ink, marginTop: 6, marginBottom: 18 }}>
           {t('multiplayer.lobby.title')}

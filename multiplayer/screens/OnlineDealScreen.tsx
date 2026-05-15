@@ -26,6 +26,7 @@ import { fonts, PALETTES, useThemeColors } from '../../theme';
 import { useLocale, useT } from '../../i18n';
 import { C2S, PublicRoomState } from '../protocol';
 import { ChatPanel } from './ChatPanel';
+import { LeaveRoomButton } from './LeaveRoomButton';
 import type { ChatMessage, RoleInfo } from '../__stub_usePartyRoom';
 
 type Props = {
@@ -35,9 +36,11 @@ type Props = {
   myPlayerId: string;
   send: (msg: C2S) => void;
   chat?: ChatMessage[];
+  /** Confirmed "Leave room" → routes user back to OnlineHomeScreen. */
+  onLeave?: () => void;
 };
 
-export function OnlineDealScreen({ state, role, myPlayerId, send, chat = [] }: Props) {
+export function OnlineDealScreen({ state, role, myPlayerId, send, chat = [], onLeave }: Props) {
   const t = useT();
   const colors = useThemeColors();
   const { locale } = useLocale();
@@ -58,6 +61,11 @@ export function OnlineDealScreen({ state, role, myPlayerId, send, chat = [] }: P
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
         <KilimBg color={colors.ink} opacity={0.05} />
+        {onLeave ? (
+          <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+            <LeaveRoomButton onLeave={onLeave} mode="active" />
+          </View>
+        ) : null}
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
           <Eyebrow style={{ marginBottom: 10 }}>{t('multiplayer.deal.role_pending')}</Eyebrow>
           <Text
@@ -82,6 +90,11 @@ export function OnlineDealScreen({ state, role, myPlayerId, send, chat = [] }: P
     return (
       <View style={{ flex: 1, backgroundColor: indigoDark, paddingTop: 50 }}>
         <DiamondBg color={colors.pomegranate} opacity={0.12} size={80} />
+        {onLeave ? (
+          <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+            <LeaveRoomButton onLeave={onLeave} mode="active" />
+          </View>
+        ) : null}
         <View
           style={{
             flex: 1,
@@ -205,6 +218,11 @@ export function OnlineDealScreen({ state, role, myPlayerId, send, chat = [] }: P
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 50 }}>
       <KilimBg color={colors.ink} opacity={0.06} />
+      {onLeave ? (
+        <View style={{ position: 'absolute', top: 14, left: 14, zIndex: 10 }}>
+          <LeaveRoomButton onLeave={onLeave} mode="active" />
+        </View>
+      ) : null}
 
       <View
         style={{
