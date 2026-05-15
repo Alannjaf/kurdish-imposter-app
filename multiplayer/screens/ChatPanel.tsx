@@ -296,9 +296,12 @@ export function ChatPanel({ chat, send, mySeat }: Props) {
               maxLength={CHAT_MAX_LEN}
               onSubmitEditing={onSend}
               returnKeyType="send"
+              // iOS Safari auto-zooms when input font-size < 16px, which makes
+              // the chat panel wider than the viewport and clips the right side.
+              // Keep at >=16px to suppress the zoom.
               style={{
                 flex: 1,
-                fontSize: 15,
+                fontSize: 16,
                 color: colors.ink,
                 backgroundColor: colors.bgElev,
                 borderRadius: 14,

@@ -25,6 +25,12 @@ export type VoiceMeshDeps = {
   getUserMedia?: (constraints: MediaStreamConstraints) => Promise<MediaStream>;
   /** Called whenever a remote stream is ready/updated for a given peer. */
   onRemoteStream?: (peerId: string, stream: MediaStream) => void;
+  /** Called once the local mic stream is acquired. Lets the hook hook up
+   *  an analyser for self-speaking detection. */
+  onLocalStream?: (stream: MediaStream) => void;
+  /** Called when a peer connection closes / is pruned. Lets the hook tear
+   *  down its analyser + audio element for that peer. */
+  onPeerClosed?: (peerId: string) => void;
   /** Optional override for the WebRTC config (e.g. additional STUN/TURN). */
   rtcConfig?: RTCConfiguration;
 };
@@ -57,6 +63,7 @@ export class VoiceMeshController {
         this.deps.getUserMedia ??
         ((c) => navigator.mediaDevices.getUserMedia(c));
       this.localStream = await getMedia({ audio: true, video: false });
+      this.deps.onLocalStream?.(this.localStream);
     }
     for (const peer of peers) {
       if (peer === this.myId) continue;
@@ -100,6 +107,7 @@ export class VoiceMeshController {
       if (!peers.has(id)) {
         this.pcs.get(id)?.close();
         this.pcs.delete(id);
+        this.deps.onPeerClosed?.(id);
       }
     }
   }

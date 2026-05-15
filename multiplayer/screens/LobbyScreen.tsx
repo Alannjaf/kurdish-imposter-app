@@ -76,6 +76,13 @@ type Props = {
     toggle: () => Promise<void>;
     setMuted: (m: boolean) => void;
     lastError: string | null;
+    /** PlayerIds currently above the speaking threshold. Drives the
+     *  glow ring on player avatars. Optional — older callers may omit. */
+    speakingPlayerIds?: Set<string>;
+    /** True if browser blocked autoplay (iOS Safari before first gesture). */
+    audioBlocked?: boolean;
+    /** Resume blocked audio elements. Must be called from a user gesture. */
+    unblockAudio?: () => Promise<void>;
   };
 };
 
@@ -203,27 +210,39 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props
                 {t('multiplayer.lobby.share_whatsapp')}
               </Text>
             </TouchableOpacity>
-            {voice?.available ? (
+          </View>
+        </Card>
+
+        {/* Voice call-to-action — own row so it's discoverable on phone.
+            When off: full-width "Talk to friends" CTA.
+            When on: split row with active state + Mute toggle. */}
+        {voice?.available ? (
+          <View style={{ marginBottom: 14 }}>
+            <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 8 }}>
               <TouchableOpacity
                 onPress={() => voice.toggle()}
                 accessibilityLabel="voice-toggle"
                 style={{
-                  paddingVertical: 8,
-                  paddingHorizontal: 14,
-                  borderRadius: 999,
+                  flex: 1,
+                  paddingVertical: 14,
+                  paddingHorizontal: 18,
+                  borderRadius: 16,
                   backgroundColor: voice.active ? colors.pomegranate : colors.bgElev,
-                  flexDirection: 'row',
+                  borderWidth: voice.active ? 0 : 1.5,
+                  borderColor: voice.active ? 'transparent' : colors.line,
+                  flexDirection: isRTL ? 'row-reverse' : 'row',
                   alignItems: 'center',
-                  gap: 6,
+                  justifyContent: 'center',
+                  gap: 10,
                 }}
               >
-                <Text style={{ fontSize: 14 }}>{voice.active ? '🎙️' : '🔇'}</Text>
+                <Text style={{ fontSize: 22 }}>{voice.active ? '🎙️' : '🔊'}</Text>
                 <Text
                   style={{
                     color: voice.active ? '#FFFFFF' : colors.ink,
-                    fontFamily: family,
-                    fontSize: 13,
-                    fontWeight: '700',
+                    fontFamily: locale === 'en' ? fonts.display : fonts.arabicDisplay,
+                    fontSize: 16,
+                    fontWeight: '800',
                   }}
                 >
                   {voice.active
@@ -231,34 +250,72 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props
                     : t('multiplayer.lobby.voice_off')}
                 </Text>
               </TouchableOpacity>
-            ) : null}
-            {voice?.active ? (
+              {voice.active ? (
+                <TouchableOpacity
+                  onPress={() => voice.setMuted(!voice.muted)}
+                  accessibilityLabel="voice-mute-toggle"
+                  style={{
+                    paddingVertical: 14,
+                    paddingHorizontal: 18,
+                    borderRadius: 16,
+                    backgroundColor: voice.muted ? colors.ink : colors.bgElev,
+                    borderWidth: voice.muted ? 0 : 1.5,
+                    borderColor: voice.muted ? 'transparent' : colors.line,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: 92,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: voice.muted ? colors.bg : colors.ink,
+                      fontFamily: family,
+                      fontSize: 14,
+                      fontWeight: '700',
+                    }}
+                  >
+                    {voice.muted
+                      ? t('multiplayer.lobby.unmute')
+                      : t('multiplayer.lobby.mute')}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+            {/* iOS Safari autoplay banner — tap to enable audio after first
+                user gesture. Only shows when at least one peer's audio
+                element failed to autoplay. */}
+            {voice.active && voice.audioBlocked && voice.unblockAudio ? (
               <TouchableOpacity
-                onPress={() => voice.setMuted(!voice.muted)}
-                accessibilityLabel="voice-mute-toggle"
+                onPress={() => { voice.unblockAudio?.(); }}
+                accessibilityLabel="voice-unblock-audio"
                 style={{
-                  paddingVertical: 8,
+                  marginTop: 8,
+                  paddingVertical: 10,
                   paddingHorizontal: 14,
-                  borderRadius: 999,
-                  backgroundColor: voice.muted ? colors.ink : colors.bgElev,
+                  borderRadius: 12,
+                  backgroundColor: colors.gold,
+                  flexDirection: isRTL ? 'row-reverse' : 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
                 }}
               >
+                <Text style={{ fontSize: 18 }}>🔊</Text>
                 <Text
                   style={{
-                    color: voice.muted ? colors.bg : colors.ink,
+                    color: colors.indigoDark,
                     fontFamily: family,
                     fontSize: 13,
                     fontWeight: '700',
+                    textAlign: 'center',
                   }}
                 >
-                  {voice.muted
-                    ? t('multiplayer.lobby.unmute')
-                    : t('multiplayer.lobby.mute')}
+                  {t('multiplayer.lobby.voice_tap_to_hear')}
                 </Text>
               </TouchableOpacity>
             ) : null}
           </View>
-        </Card>
+        ) : null}
 
         {/* Players */}
         <View style={{ marginBottom: 20 }}>
@@ -288,6 +345,7 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props
           <View style={{ gap: 8 }}>
             {state.players.map((p) => {
               const isThisHost = p.playerId === state.hostPlayerId;
+              const isSpeaking = !!voice?.speakingPlayerIds?.has(p.playerId);
               return (
                 <View
                   key={p.playerId}
@@ -310,6 +368,12 @@ export function LobbyScreen({ state, myPlayerId, send, chat = [], voice }: Props
                       backgroundColor: p.avatar ? colors.bgElev : AVATAR[p.seat % AVATAR.length],
                       alignItems: 'center',
                       justifyContent: 'center',
+                      // Speaking indicator: emerald-green ring around the
+                      // avatar of whoever is currently above the speaking
+                      // RMS threshold. Updates ~12 Hz, with hysteresis hold
+                      // so natural syllable gaps don't make it flicker.
+                      borderWidth: isSpeaking ? 2.5 : 0,
+                      borderColor: isSpeaking ? colors.olive : 'transparent',
                     }}
                   >
                     {p.avatar ? (
